@@ -1,0 +1,372 @@
+/* Pacing Frontier AI: timeline page (timeline.html).
+   A dated ledger: dates in IBM Plex Mono in a left column, a quiet rail with
+   one dot per event, the event text first, then "Why it matters" and "Source"
+   as secondary lines. When site.css provides a left margin for side heads
+   (--side), the dates move into it, so the event text keeps the full reading
+   column. On phones the date sits above each event.
+   The filter bar that timeline.js adds is styled in the second half.
+   Colours and type come only from the shared tokens in site.css. */
+
+[data-page="timeline"] {
+  /* the side margin if the layout has one, else a column of our own */
+  --tl-side: var(--side, 0px);
+  --tl-date-w: max(var(--side-w, 0px), 8.25rem);
+  --tl-gap: max(var(--side-gap, 0px), 1.75rem);
+  --tl-dot: 9px;
+}
+/* filtering relies on the hidden attribute; keep it decisive on this page */
+[data-page="timeline"] [hidden] { display: none !important; }
+
+/* ------------------------------------------------------------ periods */
+/* Year headings anchor the rail; month ranges divide it. */
+[data-page="timeline"] .prose section.sec:has(> ol.tl) > h2,
+[data-page="timeline"] .prose h2.tl-year {
+  font-size: clamp(30px, 2.2vw + 20px, 42px);
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+}
+[data-page="timeline"] .prose section.sec:has(> ol.tl) > h3,
+[data-page="timeline"] .prose h3.tl-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 16px;
+  margin: 40px 0 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+/* event count beside each period heading (added by timeline.js) */
+.tl-n {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+h2 > .tl-n { margin-left: 14px; vertical-align: 0.4em; }
+
+/* ------------------------------------------------------------ events */
+[data-page="timeline"] .prose ol.tl {
+  list-style: none;
+  margin: 22px 0 36px calc(-1 * var(--tl-side));
+  padding: 0;
+}
+[data-page="timeline"] .prose li.tl-event {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--tl-date-w) minmax(0, 1fr);
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+/* the dot on the rail, level with the first line of the event */
+[data-page="timeline"] .prose li.tl-event::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--tl-date-w) + var(--tl-gap) / 2 - var(--tl-dot) / 2);
+  top: 8px;
+  width: var(--tl-dot);
+  height: var(--tl-dot);
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--ink-2);
+}
+[data-page="timeline"] .tl-date {
+  padding-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;            /* "September 16, 2026" fits a 132px column on one line */
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+[data-page="timeline"] .tl-date time { font-variant-numeric: tabular-nums; }
+[data-page="timeline"] .tl-body {
+  min-width: 0;
+  margin-left: calc(var(--tl-gap) / 2);
+  padding: 0 0 24px calc(var(--tl-gap) / 2 - 1px);
+  border-left: 1px solid var(--rule);   /* the rail */
+}
+[data-page="timeline"] .tl-body p { margin: 0; max-width: none; }
+[data-page="timeline"] .tl-body .tl-what {
+  font-family: var(--font-body);
+  font-size: 17.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+[data-page="timeline"] .tl-body .tl-why {
+  margin-top: 6px;
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+[data-page="timeline"] .tl-body .tl-src {
+  margin-top: 4px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+[data-page="timeline"] .tl-label {
+  margin-right: 2px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ink-2);
+}
+[data-page="timeline"] .tl-label::after { content: ":"; }
+[data-page="timeline"] .tl-body a { overflow-wrap: anywhere; }
+
+/* an event reached from a link or a search result */
+[data-page="timeline"] .prose li.tl-event:target::before { background: var(--ink); border-color: var(--ink); }
+[data-page="timeline"] li.tl-event:target .tl-what {
+  background: var(--mark);
+  box-shadow: 0 0 0 4px var(--mark);
+  border-radius: 1px;
+}
+
+/* matches for the text filter (CSS Custom Highlight API, where supported) */
+::highlight(tl-match) { background-color: var(--mark); color: var(--ink); }
+
+@media (max-width: 640px) {
+  [data-page="timeline"] .prose ol.tl { margin-left: 0; }
+  [data-page="timeline"] .prose li.tl-event {
+    display: block;
+    padding: 0 0 22px 18px;
+    border-left: 1px solid var(--rule);
+  }
+  [data-page="timeline"] .prose li.tl-event::before { left: calc(var(--tl-dot) / -2 - 0.5px); top: 5px; }
+  [data-page="timeline"] .tl-date { padding: 0 0 3px; font-size: 12.5px; text-align: left; }
+  [data-page="timeline"] .tl-body { margin: 0; padding: 0; border-left: 0; }
+  [data-page="timeline"] .tl-body .tl-what { font-size: 17px; }
+  [data-page="timeline"] .tl-body .tl-why { font-size: 15px; }
+}
+
+/* Hold the bar's place until the script adds it, so the page does not jump on
+   load. Only when scripting is on; the static page reserves nothing. */
+@media (scripting: enabled) {
+  [data-page="timeline"] .prose:not(.tlf-ready)::before { content: ""; display: block; height: 123px; }
+}
+@media (scripting: enabled) and (max-width: 640px) {
+  [data-page="timeline"] .prose:not(.tlf-ready)::before { height: 152px; }
+}
+@media (scripting: enabled) and (max-width: 340px) {
+  [data-page="timeline"] .prose:not(.tlf-ready)::before { height: 185px; }
+}
+
+/* ------------------------------------------------------------ filter bar (timeline.js) */
+.tlf {
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + var(--tlf-top, 0px));
+  z-index: 15;
+  /* reach into the side margin too, so dates never show beside the bar */
+  margin: 0 0 24px calc(-1 * var(--tl-side));
+  padding: 12px 0 10px var(--tl-side);
+  background: var(--bg);
+  border-bottom: 1px solid transparent;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+/* the rule appears once content scrolls beneath the bar */
+.tlf.is-stuck { border-bottom-color: var(--rule); }
+.tlf-main,
+.tlf-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.tlf-meta { margin-top: 8px; }
+.tlf-panel { display: contents; }
+.tlf-field { position: relative; flex: 1 1 220px; min-width: 0; }
+.tlf-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  color: var(--ink-2);
+  pointer-events: none;
+}
+.tlf-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 7px 10px 7px 34px;
+  font: inherit;
+  font-size: 16px;            /* 16px keeps phones from zooming in */
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--ink-2);
+  border-radius: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.tlf-input::placeholder { color: var(--ink-2); opacity: 1; }
+.tlf-input::-webkit-search-decoration { -webkit-appearance: none; }
+/* the field's own clear button, drawn in the ink colour */
+.tlf-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  background-color: var(--ink-2);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3 3l8 8M11 3l-8 8' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 14px 14px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3 3l8 8M11 3l-8 8' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 14px 14px no-repeat;
+  cursor: pointer;
+}
+.tlf-input::-webkit-search-cancel-button:hover { background-color: var(--ink); }
+.tlf-years { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tlf-label { margin-right: 2px; font-size: 13px; color: var(--ink-2); }
+.tlf-chip,
+.tlf-btn {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0;
+  padding: 5px 9px;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.tlf-chip:hover,
+.tlf-btn:hover { border-color: var(--rule-strong, var(--ink-2)); }
+.tlf-chip-n { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+.tlf-chip[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.tlf-chip[aria-pressed="true"] .tlf-chip-n { color: inherit; }
+.tlf-chip.is-zero:not([aria-pressed="true"]) { color: var(--ink-2); border-style: dashed; }
+.tlf-btn { background: transparent; font-size: 13.5px; }
+.tlf-btn[aria-expanded="true"] { background: var(--surface); border-color: var(--rule-strong, var(--ink-2)); }
+.tlf-more,
+.tlf-jump-btn { align-items: center; }
+.tlf-more::after,
+.tlf-jump-btn::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin: -3px 1px 0 0;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+.tlf-more[aria-expanded="true"]::after,
+.tlf-jump-btn[aria-expanded="true"]::after { margin-top: 3px; transform: rotate(-135deg); }
+.tlf-more { display: none; }
+.tlf-more-n {
+  padding: 0 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 3px;
+}
+.tlf-count { flex: 1 1 auto; margin: 0; max-width: none; font-size: 13px; color: var(--ink-2); }
+.tlf-count .n { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); }
+
+/* jump list of periods */
+.tlf-jump { position: relative; }
+.tlf-jump-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 2;
+  width: min(300px, calc(100vw - 32px));
+  max-height: min(64vh, 420px);
+  overflow: auto;
+  padding: 6px 0;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--ink) 28%, transparent);
+}
+.tlf-jump-list { list-style: none; margin: 0; padding: 0; }
+.tlf-jump-list li { margin: 0; padding: 0; max-width: none; }
+.tlf-jump-list a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 7px 14px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.tlf-jump-list a:hover { background: var(--bg); text-decoration: underline; text-underline-offset: 2px; }
+.tlf-jump-list a:focus-visible { outline-offset: -2px; }
+.tlf-jump-list .lvl-2 > a { font-weight: 650; }
+.tlf-jump-list .lvl-3 > a { padding-left: 30px; }
+.tlf-jn { font-family: var(--font-mono); font-size: 12px; font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+
+/* while filtering, the first period shown starts right under the bar */
+[data-page="timeline"] .prose > section.sec.tl-first { margin-top: 0; }
+
+/* nothing matches */
+.tlf-empty { margin: 8px 0 56px; padding: 8px 0; font-family: var(--font-ui); }
+.tlf-empty p { margin: 0 0 6px; }
+.tlf-empty-title { font-family: var(--font-display); font-size: 23px; line-height: 1.3; color: var(--ink); }
+.tlf-empty-hint { font-family: var(--font-ui); font-size: 14px; color: var(--ink-2); }
+.tlf-empty .tlf-btn { margin-top: 10px; }
+
+/* focus and visually hidden text */
+.tlf :focus-visible,
+.tlf-empty :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tlf-input:focus-visible { outline-offset: 1px; }
+.tlf-vh {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tlf-chip, .tlf-btn { transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
+}
+@media (forced-colors: active) {
+  .tlf-chip[aria-pressed="true"] { outline: 2px solid CanvasText; outline-offset: 1px; }
+  [data-page="timeline"] .prose li.tl-event::before { forced-color-adjust: none; background: Canvas; border-color: CanvasText; }
+}
+
+/* phones: search first, then the years, then the count; once the bar sticks
+   it folds to the search, a Filters button and the count */
+@media (max-width: 640px) {
+  /* full width on phones, like the outline bar above it */
+  .tlf { margin-inline: calc(-1 * var(--gutter, 16px)); padding: 10px var(--gutter, 16px) 8px; }
+  .tlf-main { gap: 8px; }
+  .tlf-meta { gap: 6px 8px; margin-top: 8px; }
+  .tlf-field { flex-basis: 100%; }
+  .tlf-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+  .tlf-years { gap: 5px; }
+  .tlf-chip { padding: 4px 7px; gap: 5px; font-size: 13.5px; }
+  .tlf-btn { padding: 4px 8px; }
+  .tlf-count { font-size: 12.5px; }
+  .tlf.is-stuck { padding-top: 8px; padding-bottom: 6px; }
+  .tlf.is-stuck .tlf-meta .tlf-btn { padding-top: 2px; padding-bottom: 2px; }
+  .tlf.is-stuck .tlf-field { flex: 1 1 0; }
+  .tlf.is-stuck .tlf-more { display: inline-flex; }
+  .tlf.is-stuck .tlf-panel { display: none; }
+  .tlf.is-stuck .tlf-panel.is-open { display: flex; flex: 1 1 100%; }
+  .tlf.is-stuck .tlf-meta { margin-top: 6px; }
+}

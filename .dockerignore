@@ -1,0 +1,13 @@
+# Only package.json, server.js and site/ go into the image.
+.git
+.gitignore
+.dockerignore
+.env
+.env.*
+node_modules
+npm-debug.log*
+.DS_Store
+Dockerfile
+railway.json
+README.md
+scripts

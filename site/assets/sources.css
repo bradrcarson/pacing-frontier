@@ -1,0 +1,438 @@
+/* Pacing Frontier AI: sources page (sources.html).
+   Entries read title first, then the byline. Each entry's reading tag shows
+   twice: as its bullet (a shape) and as a small badge that holds the tag text
+   from the document, so status never rests on colour alone. The badge border
+   follows the source lists on other pages: solid when read, dashed when seen
+   but not opened, dotted when it could not be read.
+     Opened      filled dot     solid badge
+     Listed      ring           dashed badge
+     Paper ref   open square    dashed badge
+     Not opened  dash           dashed badge
+     Blocked     cross          dotted badge
+     Failed      cross          dotted badge
+   The Core Reading List sits in its own panel as the place to start.
+   The filter bar that sources.js adds is styled in the second half.
+   Colours and type come only from the shared tokens in site.css. */
+
+[data-page="sources"] {
+  --src-mark: 8px;
+  --src-side: var(--side, 0px);
+  --src-badge-line: var(--rule-strong, var(--ink-2));
+}
+/* filtering relies on the hidden attribute; keep it decisive on this page */
+[data-page="sources"] [hidden] { display: none !important; }
+
+/* About 2,000 entries: the browser may skip layout and paint for sections far
+   from view, which keeps loading and clearing quick. sources.js sets each
+   section's height estimate (--src-est) from the entries it shows, and lays
+   every section out exactly while a narrow filter is on (.srcf-exact). */
+[data-page="sources"] .prose > section.sec {
+  content-visibility: auto;
+  contain-intrinsic-size: auto var(--src-est, 2400px);
+}
+[data-page="sources"] .prose.srcf-exact > section.sec {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+[data-page="sources"] .prose > section.sec > :last-child { margin-bottom: 0; }
+
+/* ------------------------------------------------------------ entries */
+[data-page="sources"] .prose ul:has(> li.src) {
+  list-style: none;
+  margin: 12px 0 28px;
+  padding: 0;
+}
+[data-page="sources"] .prose ul:has(> li.src) > li {
+  position: relative;
+  max-width: none;
+  margin: 0 0 9px;
+  padding-left: 20px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+/* the title link leads; the byline follows in the quieter interface face */
+[data-page="sources"] .prose ul:has(> li.src) > li > a:first-child,
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] li > a:first-child {
+  font-family: var(--font-body);
+  font-size: 16.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+}
+[data-page="sources"] .prose ul:has(> li.src) > li > a:first-child:hover,
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] li > a:first-child:hover {
+  text-decoration-color: currentColor;
+}
+/* entries that open with text keep their links plain: the working paper's
+   reference list, and entries that sources.js marks as .src-plain */
+[data-page="sources"] .prose .sec-obtain li.src > a:first-child,
+[data-page="sources"] .prose li.src-plain > a:first-child {
+  font: inherit;
+  color: var(--ink);
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+/* the reading tag badge: the last italic run of every entry */
+[data-page="sources"] .prose li.src > em:last-of-type {
+  margin-left: 2px;
+  padding: 1px 6px;
+  font-family: var(--font-ui);
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.005em;
+  color: var(--ink-2);
+  border: 1px solid var(--src-badge-line);
+  border-radius: 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+[data-page="sources"] .prose li.src:is([data-tag="listed"], [data-tag="paper-ref"], [data-tag="not-opened"]) > em:last-of-type { border-style: dashed; }
+[data-page="sources"] .prose li.src:is([data-tag="blocked"], [data-tag="failed"]) > em:last-of-type { border-style: dotted; border-width: 1.5px; }
+
+/* bullet shapes, shared by the entries and the filter chips */
+[data-page="sources"] .prose li.src::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 7px;
+  color: var(--ink-2);
+}
+[data-page="sources"] .prose li.src::before,
+.srcf-mk {
+  width: var(--src-mark);
+  height: var(--src-mark);
+  border-radius: 50%;
+  background: currentColor;
+}
+.srcf-mk { display: inline-block; flex: none; align-self: center; }
+[data-page="sources"] .prose li.src[data-tag="listed"]::before,
+.srcf-mk[data-tag="listed"] {
+  background: transparent;
+  border: 1.5px solid currentColor;
+}
+[data-page="sources"] .prose li.src[data-tag="paper-ref"]::before,
+.srcf-mk[data-tag="paper-ref"] {
+  border-radius: 1px;
+  background: transparent;
+  border: 1.5px solid currentColor;
+}
+[data-page="sources"] .prose li.src[data-tag="not-opened"]::before,
+.srcf-mk[data-tag="not-opened"] {
+  height: 2px;
+  border-radius: 1px;
+}
+[data-page="sources"] .prose li.src[data-tag="not-opened"]::before { margin-top: 3px; }
+[data-page="sources"] .prose li.src:is([data-tag="blocked"], [data-tag="failed"])::before,
+.srcf-mk:is([data-tag="blocked"], [data-tag="failed"]) {
+  width: 9px;
+  height: 9px;
+  border-radius: 0;
+  background:
+    linear-gradient(45deg, transparent calc(50% - 0.85px), currentColor calc(50% - 0.85px), currentColor calc(50% + 0.85px), transparent calc(50% + 0.85px)),
+    linear-gradient(-45deg, transparent calc(50% - 0.85px), currentColor calc(50% - 0.85px), currentColor calc(50% + 0.85px), transparent calc(50% + 0.85px));
+}
+
+/* ------------------------------------------------------------ core reading list */
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] {
+  padding-bottom: 18px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink);
+  padding-right: clamp(16px, 3vw, 32px);
+}
+/* inner padding on the left, unless the section already reaches into the side margin */
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] {
+  padding-left: max(var(--src-side), clamp(16px, 3vw, 32px));
+}
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] > h2 { margin-top: 2px; }
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] > h3 {
+  margin: 30px 0 12px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: 14.5px;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] > ul > li {
+  margin: 0 0 15px;
+  padding: 0;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+[data-page="sources"] .prose section[aria-labelledby="core-reading-list"] li > a:first-child { font-size: 17.5px; }
+/* wide screens: the group names become side heads in the left margin, so the
+   panel reads as an index of the forty places to start */
+@media (min-width: 1180px) {
+  [data-page="sources"] .prose section[aria-labelledby="core-reading-list"] {
+    display: grid;
+    grid-template-columns: var(--side-w, 132px) minmax(0, 1fr);
+    column-gap: var(--side-gap, 28px);
+    align-items: baseline;
+    padding-left: 0;
+  }
+  [data-page="sources"] .prose section[aria-labelledby="core-reading-list"] > * { grid-column: 2; }
+  [data-page="sources"] .prose section[aria-labelledby="core-reading-list"] > h3 {
+    grid-column: 1;
+    margin: 0;
+    padding: 0 0 0 14px;
+    border: 0;
+    font-size: 13.5px;
+    line-height: 1.4;
+    text-align: right;
+    text-wrap: balance;
+  }
+  [data-page="sources"] .prose section[aria-labelledby="core-reading-list"] > ul { margin-bottom: 26px; }
+  [data-page="sources"] .prose section[aria-labelledby="core-reading-list"] > h3 .srcf-n { display: block; margin: 2px 0 0; }
+}
+
+/* counts beside headings while a filter is on (added by sources.js) */
+.srcf-n {
+  margin-left: 10px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-2);
+  white-space: nowrap;
+  vertical-align: 0.1em;
+}
+h2 > .srcf-n { vertical-align: 0.3em; }
+
+/* matches for the text filter (CSS Custom Highlight API, where supported) */
+::highlight(src-match) { background-color: var(--mark); color: var(--ink); }
+
+/* Hold the bar's place until the script adds it, so the page does not jump on
+   load. Only when scripting is on; the static page reserves nothing. */
+@media (scripting: enabled) {
+  [data-page="sources"] .prose:not(.srcf-ready)::before { content: ""; display: block; height: 186px; }
+}
+@media (scripting: enabled) and (max-width: 640px) {
+  [data-page="sources"] .prose:not(.srcf-ready)::before { height: 247px; }
+}
+@media (scripting: enabled) and (max-width: 360px) {
+  [data-page="sources"] .prose:not(.srcf-ready)::before { height: 280px; }
+}
+
+/* ------------------------------------------------------------ filter bar (sources.js) */
+.srcf {
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + var(--srcf-top, 0px));
+  z-index: 15;
+  /* reach into the side margin too, like the sections below */
+  margin: 0 0 24px calc(-1 * var(--src-side));
+  padding: 12px 0 10px var(--src-side);
+  background: var(--bg);
+  border-bottom: 1px solid transparent;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+/* the rule appears once content scrolls beneath the bar */
+.srcf.is-stuck { border-bottom-color: var(--rule); }
+.srcf-main,
+.srcf-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.srcf-meta { margin-top: 8px; }
+.srcf-panel { display: contents; }
+.srcf-field { position: relative; flex: 1 1 260px; min-width: 0; }
+.srcf-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  color: var(--ink-2);
+  pointer-events: none;
+}
+.srcf-input,
+.srcf-select {
+  display: block;
+  width: 100%;
+  margin: 0;
+  font: inherit;
+  font-size: 16px;            /* 16px keeps phones from zooming in */
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--ink-2);
+  border-radius: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.srcf-input { padding: 7px 10px 7px 34px; }
+.srcf-input::placeholder { color: var(--ink-2); opacity: 1; }
+.srcf-input::-webkit-search-decoration { -webkit-appearance: none; }
+/* the field's own clear button, drawn in the ink colour */
+.srcf-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  background-color: var(--ink-2);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3 3l8 8M11 3l-8 8' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 14px 14px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3 3l8 8M11 3l-8 8' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / 14px 14px no-repeat;
+  cursor: pointer;
+}
+.srcf-input::-webkit-search-cancel-button:hover { background-color: var(--ink); }
+.srcf-select { padding: 7px 32px 7px 10px; cursor: pointer; text-overflow: ellipsis; }
+.srcf-topic { display: flex; align-items: center; gap: 8px; flex: 0 1 300px; min-width: 0; }
+.srcf-selectwrap { position: relative; display: block; flex: 1 1 auto; min-width: 0; }
+.srcf-selectwrap::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-right: 1.5px solid var(--ink-2);
+  border-bottom: 1.5px solid var(--ink-2);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.srcf-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1 1 100%; }
+.srcf-label { margin-right: 2px; font-size: 13px; color: var(--ink-2); }
+.srcf-chip,
+.srcf-btn {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0;
+  padding: 5px 9px;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.srcf-chip:hover,
+.srcf-btn:hover { border-color: var(--rule-strong, var(--ink-2)); }
+.srcf-chip .srcf-mk { color: var(--ink-2); }
+.srcf-chip-n { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+.srcf-chip[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.srcf-chip[aria-pressed="true"] .srcf-chip-n,
+.srcf-chip[aria-pressed="true"] .srcf-mk { color: inherit; }
+.srcf-chip.is-zero:not([aria-pressed="true"]) { color: var(--ink-2); border-style: dashed; }
+.srcf-btn { background: transparent; font-size: 13.5px; }
+.srcf-btn[aria-expanded="true"] { background: var(--surface); border-color: var(--rule-strong, var(--ink-2)); }
+.srcf-more { display: none; align-items: center; }
+.srcf-more::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin: -3px 1px 0 0;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+.srcf-more[aria-expanded="true"]::after { margin-top: 3px; transform: rotate(-135deg); }
+.srcf-more-n {
+  padding: 0 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 3px;
+}
+.srcf-count { flex: 1 1 auto; margin: 0; max-width: none; font-size: 13px; color: var(--ink-2); }
+.srcf-count .n { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); }
+
+/* once stuck, the bar folds to the search, a Filters button and the count */
+.srcf.is-stuck { padding-top: 8px; padding-bottom: 7px; }
+.srcf.is-stuck .srcf-more { display: inline-flex; }
+.srcf.is-stuck .srcf-panel { display: none; }
+.srcf.is-stuck .srcf-panel.is-open {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  flex: 1 1 100%;
+  padding-top: 2px;
+}
+.srcf.is-stuck .srcf-meta { margin-top: 6px; }
+.srcf.is-stuck .srcf-meta .srcf-btn { padding-top: 2px; padding-bottom: 2px; }
+
+/* while filtering, the first section shown starts right under the bar */
+[data-page="sources"] .prose > section.sec.src-first { margin-top: 0; }
+
+/* nothing matches */
+.srcf-empty { margin: 8px 0 56px; padding: 8px 0; font-family: var(--font-ui); }
+.srcf-empty p { margin: 0 0 6px; }
+.srcf-empty-title { font-family: var(--font-display); font-size: 23px; line-height: 1.3; color: var(--ink); }
+.srcf-empty-hint { font-family: var(--font-ui); font-size: 14px; color: var(--ink-2); }
+.srcf-empty .srcf-btn { margin-top: 10px; }
+
+/* focus and visually hidden text */
+.srcf :focus-visible,
+.srcf-empty :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.srcf-input:focus-visible,
+.srcf-select:focus-visible { outline-offset: 1px; }
+.srcf-vh {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .srcf-chip, .srcf-btn { transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
+}
+@media (forced-colors: active) {
+  .srcf-chip[aria-pressed="true"] { outline: 2px solid CanvasText; outline-offset: 1px; }
+  [data-page="sources"] .prose li.src::before, .srcf-mk { forced-color-adjust: none; color: CanvasText; }
+}
+
+@media (max-width: 640px) {
+  /* full width on phones, like the outline bar above it */
+  .srcf { margin-inline: calc(-1 * var(--gutter, 16px)); padding: 10px var(--gutter, 16px) 8px; }
+  .srcf.is-stuck { padding-top: 8px; padding-bottom: 6px; }
+  .srcf-main { gap: 8px; }
+  .srcf-field { flex: 1 1 100%; }
+  .srcf.is-stuck .srcf-field { flex: 1 1 0; }
+  .srcf-topic { flex: 1 1 100%; }
+  .srcf-tags { gap: 6px 5px; }
+  .srcf-tags .srcf-label { flex: 1 1 100%; }
+  .srcf-chip { padding: 4px 7px; gap: 5px; font-size: 13.5px; }
+  .srcf-btn { padding: 4px 8px; }
+  .srcf-count { font-size: 12.5px; }
+  [data-page="sources"] .prose ul:has(> li.src) > li { padding-left: 18px; }
+  [data-page="sources"] .prose ul:has(> li.src) > li > a:first-child { font-size: 16px; }
+  [data-page="sources"] .prose section[aria-labelledby="core-reading-list"] {
+    margin-inline: calc(-1 * var(--gutter, 16px));
+    padding-inline: var(--gutter, 16px);
+    border-inline: 0;
+  }
+}
